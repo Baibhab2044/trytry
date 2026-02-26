@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EcoYatra — Eco Dashboard Nepal</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;0,900;1,500;1,700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="login-screen">
+  <div class="login-nature-bg"></div>
+  <div class="login-leaves" id="login-leaves"></div>
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="login-logo-icon">🌿</div>
+      <span class="login-logo-text">Eco<em>Yatra</em></span>
+    </div>
+    <p class="login-tagline">Nepal's Eco-Tourism & Waste Management Platform</p>
+    <div class="login-divider"><span>Quick Login — Select Account</span></div>
+    <div class="accounts-grid" id="accounts-grid"></div>
+    <div class="login-divider"><span>Or enter manually</span></div>
+    <div class="login-form-group">
+      <label>Email Address</label>
+      <input class="login-input" type="email" id="l-email" placeholder="e.g. priya@ecoyatra.np">
+    </div>
+    <div class="login-form-group">
+      <label>Password</label>
+      <input class="login-input" type="password" id="l-pass" placeholder="••••••••">
+    </div>
+    <button class="btn-signin" onclick="doLogin()">Sign In to Dashboard</button>
+    <p class="login-hint">🔒 All accounts use password: <strong>green123</strong></p>
+  </div>
+</div>
+
+<div id="app">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="topbar-logo">
+      <div class="topbar-logo-icon">🌿</div>
+      <span>Eco<em>Yatra</em></span>
+    </div>
+    <nav class="topbar-nav" id="topbar-nav">
+      <!-- injected by JS per role -->
+    </nav>
+    <div class="topbar-right">
+      <span class="topbar-greeting">Hello, <strong id="tb-name">—</strong></span>
+      <span class="topbar-role-badge" id="tb-badge"></span>
+      <div class="avatar" id="tb-avatar">?</div>
+      <button class="btn-logout" onclick="signOut()">Sign Out</button>
+    </div>
+  </div>
+
+  <div class="app-body">
+    <aside class="sidebar" id="sidebar">
+      <!-- injected by JS per role -->
+    </aside>
+
+    <main class="main" id="main-content">
+
+    
+      <div class="view" id="view-user-dash">
+        <div class="dash-header">
+          <div>
+            <h1>Good morning, <em id="dash-name">Explorer</em> 🌿</h1>
+            <p>Here's your eco-tourism snapshot for Nepal</p>
+          </div>
+          <div class="date-chip" id="date-chip"></div>
+        </div>
+        <div class="stats-row">
+          <div class="stat-card">
+            <div class="stat-card-bg">🏨</div>
+            <div class="stat-icon si-green">🏨</div>
+            <div class="stat-num">148</div>
+            <div class="stat-label">Eco-Certified Hotels</div>
+            <div class="stat-delta delta-up">↑ 12 this month</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-bg">⭐</div>
+            <div class="stat-icon si-gold">⭐</div>
+            <div class="stat-num" id="user-ecoscore-num">0</div>
+            <div class="stat-label">Your EcoScore</div>
+            <div class="stat-delta delta-up" id="user-ecoscore-delta">Start booking to earn!</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-bg">🌱</div>
+            <div class="stat-icon si-green">🌱</div>
+            <div class="stat-num" id="user-carbon-num">0kg</div>
+            <div class="stat-label">Carbon Saved</div>
+            <div class="stat-delta delta-up" id="user-carbon-delta">vs standard travel</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-bg">🌳</div>
+            <div class="stat-icon si-green">🌳</div>
+            <div class="stat-num">18.4k</div>
+            <div class="stat-label">Trees Planted (2024)</div>
+            <div class="stat-delta delta-up">↑ 1,200 this week</div>
+          </div>
+        </div>
+        <div class="nature-row">
+          <div class="nature-mini" onclick="showView('user-hotels')">
+            <img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&q=70" alt="Himalaya" loading="lazy">
+            <div class="nature-mini-count">34 hotels</div>
+            <div class="nature-mini-label">🏔️ Himalayan Region</div>
+          </div>
+          <div class="nature-mini" onclick="showView('user-hotels')">
+            <img src="https://images.unsplash.com/photo-1583416750470-965b2707b355?w=400&q=70" alt="Lake" loading="lazy">
+            <div class="nature-mini-count">22 hotels</div>
+            <div class="nature-mini-label">🌊 Lakeside Retreats</div>
+          </div>
+          <div class="nature-mini" onclick="showView('user-hotels')">
+            <img src="https://images.unsplash.com/photo-1588668214407-6ea9a6d8c272?w=400&q=70" alt="Jungle" loading="lazy">
+            <div class="nature-mini-count">19 hotels</div>
+            <div class="nature-mini-label">🐘 Jungle Lodges</div>
+          </div>
+          <div class="nature-mini" onclick="showView('user-waste')">
+            <img src="https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=400&q=70" alt="Forest" loading="lazy">
+            <div class="nature-mini-count">47 resolved</div>
+            <div class="nature-mini-label">🌿 Clean Forest Zones</div>
+          </div>
+        </div>
+        <div class="dash-grid">
+          <div class="panel">
+            <div class="panel-header">
+              <div>
+                <div class="panel-title">Top Eco Hotels</div>
+                <div class="panel-sub">Sorted by eco score</div>
+              </div>
+              <button class="panel-action" onclick="showView('user-hotels')">View All →</button>
+            </div>
+            <div class="hotel-rows" id="dash-hotel-rows"></div>
+          </div>
+          <div class="panel">
+            <div class="panel-header">
+              <div>
+                <div class="panel-title">Your EcoScore Breakdown</div>
+                <div class="panel-sub">Points earned per activity</div>
+              </div>
+            </div>
+            <div class="activity-list" id="user-ecoscore-breakdown"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- USER HOTELS -->
+      <div class="view" id="view-user-hotels">
+        <div class="hotels-header">
+          <div>
+            <h2>Eco-Certified Hotels</h2>
+            <p style="font-size:.84rem;color:var(--muted);margin-top:.2rem">Browse and book sustainability-certified stays across Nepal</p>
+          </div>
+          <div class="search-outer">
+            <span style="font-size:.9rem;opacity:.45;margin-right:.5rem">🔍</span>
+            <input type="text" id="hotel-q" placeholder="Search hotels, regions, amenities…" oninput="filterHotels()">
+            <button class="search-btn-inner" onclick="filterHotels()">Search</button>
+          </div>
+        </div>
+        <div class="filter-pills" id="filter-pills">
+          <button class="fpill on" onclick="filterTag(this,'')">All</button>
+          <button class="fpill" onclick="filterTag(this,'Solar')">☀️ Solar</button>
+          <button class="fpill" onclick="filterTag(this,'Water')">💧 Water</button>
+          <button class="fpill" onclick="filterTag(this,'Organic')">🌾 Organic</button>
+          <button class="fpill" onclick="filterTag(this,'Jungle')">🌴 Jungle</button>
+          <button class="fpill" onclick="filterTag(this,'Himalaya')">🏔️ Himalaya</button>
+          <button class="fpill" onclick="filterTag(this,'Lakeside')">🌊 Lakeside</button>
+        </div>
+        <div class="hotels-grid" id="hotels-grid"></div>
+      </div>
+
+      <!-- USER WASTE MAP -->
+      <div class="view" id="view-user-waste">
+        <div class="waste-topbar">
+          <div>
+            <h2>Nepal Waste Locator Map</h2>
+            <p>Real interactive map — zoom, pan, and click to drop waste report pins</p>
+          </div>
+          <div class="waste-stats">
+            <div class="wstat"><span class="wstat-n">2,341</span><span class="wstat-l">Filed</span></div>
+            <div class="wstat"><span class="wstat-n">2,199</span><span class="wstat-l">Resolved</span></div>
+            <div class="wstat"><span class="wstat-n">142</span><span class="wstat-l">Active</span></div>
+            <div class="wstat"><span class="wstat-n">48h</span><span class="wstat-l">Avg. Response</span></div>
+          </div>
+        </div>
+        <div class="waste-body">
+          <div id="map"></div>
+          <div class="waste-panel">
+            <div class="wp-header">
+              <h3>🗑 Waste Reports</h3>
+              <p>Click map to drop a pin · Upload photos</p>
+            </div>
+            <div class="wp-list" id="wp-list"></div>
+            <div class="wp-form">
+              <h4>New Report</h4>
+              <span class="pin-ind" id="pin-ind">📍 Click map to select location</span>
+              <select class="fi" id="w-type">
+                <option value="">Select waste type…</option>
+                <option>🧴 Plastic & Single-use</option>
+                <option>🍺 Glass & Bottles</option>
+                <option>🥫 Metal & Cans</option>
+                <option>📦 Cardboard & Paper</option>
+                <option>🏚️ Construction Debris</option>
+                <option>⚗️ Hazardous / Chemical</option>
+                <option>🗑️ Mixed General Waste</option>
+                <option>🐄 Organic / Food Waste</option>
+              </select>
+              <input class="fi" type="text" id="w-loc" placeholder="Location description…">
+              <textarea class="fi" id="w-note" placeholder="Additional notes…" style="min-height:52px;resize:vertical"></textarea>
+              <div class="photo-upload-area" id="photo-area" onclick="document.getElementById('photo-input').click()">
+                <input type="file" id="photo-input" accept="image/*" style="display:none" onchange="handlePhoto(event)">
+                <div class="photo-upload-icon">📷</div>
+                <div class="photo-upload-text">Tap to add a photo of the waste site</div>
+              </div>
+              <div class="photo-preview-wrap" id="photo-preview-wrap">
+                <img id="photo-preview-img" src="" alt="preview" class="photo-preview-img">
+                <button class="photo-remove" onclick="clearPhoto()">✕</button>
+              </div>
+              <button class="btn-submit-rpt" onclick="submitReport()">📤 Submit Report (+20 EcoScore)</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="view" id="view-user-carbon">
+        <div class="dash-header">
+          <div>
+            <h1>🌱 Carbon <em>Footprint</em></h1>
+            <p>Track your fuel and energy usage and savings vs standard travel</p>
+          </div>
+          <div class="date-chip" id="carbon-date-chip"></div>
+        </div>
+        <div class="stats-row">
+          <div class="stat-card">
+            <div class="stat-card-bg">🌱</div>
+            <div class="stat-icon si-green">🌱</div>
+            <div class="stat-num" id="cf-saved">0 kg</div>
+            <div class="stat-label">Total CO₂ Saved</div>
+            <div class="stat-delta delta-up">vs petrol vehicle</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-bg">⚡</div>
+            <div class="stat-icon si-sky">⚡</div>
+            <div class="stat-num" id="cf-ev-km">0 km</div>
+            <div class="stat-label">EV Distance Travelled</div>
+            <div class="stat-delta delta-up">Zero emissions</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-bg">🏨</div>
+            <div class="stat-icon si-green">🏨</div>
+            <div class="stat-num" id="cf-hotel-nights">0</div>
+            <div class="stat-label">Eco Hotel Nights</div>
+            <div class="stat-delta delta-up">Low carbon stays</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-bg">📌</div>
+            <div class="stat-icon si-gold">📌</div>
+            <div class="stat-num" id="cf-pins">0</div>
+            <div class="stat-label">Waste Pins Filed</div>
+            <div class="stat-delta delta-up">Community impact</div>
+          </div>
+        </div>
+        <div class="dash-grid">
+          <div class="panel">
+            <div class="panel-header">
+              <div>
+                <div class="panel-title">Energy Usage Log</div>
+                <div class="panel-sub">Your travel & stay energy breakdown</div>
+              </div>
+            </div>
+            <div class="activity-list" id="cf-activity-log">
+              <div style="padding:2rem;text-align:center;color:var(--muted);font-size:.88rem">No activity yet — book a hotel, rent an EV or pin waste to start tracking.</div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-header">
+              <div>
+                <div class="panel-title">Savings vs Standard Travel</div>
+                <div class="panel-sub">Your eco choices vs average Nepali traveller</div>
+              </div>
+            </div>
+            <div style="padding:1.5rem">
+              <div class="carbon-compare-row">
+                <span class="cc-label">🚌 Standard jeep hire</span>
+                <div class="cc-bar-wrap"><div class="cc-bar cc-bar-bad" id="cc-jeep" style="width:80%"></div></div>
+                <span class="cc-val" id="cc-jeep-val">~120 kg CO₂</span>
+              </div>
+              <div class="carbon-compare-row">
+                <span class="cc-label">⚡ EV rental (your trips)</span>
+                <div class="cc-bar-wrap"><div class="cc-bar cc-bar-good" id="cc-ev" style="width:10%"></div></div>
+                <span class="cc-val cc-green" id="cc-ev-val">0 kg CO₂</span>
+              </div>
+              <div class="carbon-compare-row">
+                <span class="cc-label">🏨 Standard hotel</span>
+                <div class="cc-bar-wrap"><div class="cc-bar cc-bar-bad" id="cc-hotel-std" style="width:60%"></div></div>
+                <span class="cc-val" id="cc-hotel-std-val">~45 kg CO₂</span>
+              </div>
+              <div class="carbon-compare-row">
+                <span class="cc-label">🌿 Eco hotel (your stays)</span>
+                <div class="cc-bar-wrap"><div class="cc-bar cc-bar-good" id="cc-hotel-eco" style="width:15%"></div></div>
+                <span class="cc-val cc-green" id="cc-hotel-eco-val">~8 kg CO₂</span>
+              </div>
+              <div class="carbon-total-box">
+                <span class="ct-label">Your total CO₂ saved</span>
+                <span class="ct-value" id="ct-value">0 kg</span>
+                <span class="ct-sub">Keep booking green to grow this number 🌱</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="view" id="view-hotel-dash">
+        <div class="dash-header">
+          <div>
+            <h1>🏨 Hotel <em>Admin Dashboard</em></h1>
+            <p>Manage your property, eco score and customer bookings</p>
+          </div>
+          <div class="date-chip"></div>
+        </div>
+        <div class="stats-row">
+          <div class="stat-card">
+            <div class="stat-card-bg">👥</div>
+            <div class="stat-icon si-green">👥</div>
+            <div class="stat-num">312</div>
+            <div class="stat-label">Customers Received</div>
+            <div class="stat-delta delta-up">↑ 24 this month</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-bg">🍃</div>
+            <div class="stat-icon si-green">🍃</div>
+            <div class="stat-num" id="hotel-eco-score-num">4/5</div>
+            <div class="stat-label">Current Eco Score</div>
+            <div class="stat-delta delta-up" id="hotel-eco-score-label">Excellent</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-bg">🏅</div>
+            <div class="stat-icon si-gold">🏅</div>
+            <div class="stat-num" id="hotel-badge-status">Silver</div>
+            <div class="stat-label">Green Badge Level</div>
+            <div class="stat-delta delta-up">1 activity away from Gold</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-bg">💰</div>
+            <div class="stat-icon si-sky">💰</div>
+            <div class="stat-num">NPR 1.2M</div>
+            <div class="stat-label">Revenue This Month</div>
+            <div class="stat-delta delta-up">↑ 18% vs last month</div>
+          </div>
+        </div>
+        <div class="dash-grid">
+          <div class="panel">
+            <div class="panel-header">
+              <div>
+                <div class="panel-title">Recent Customer Bookings</div>
+                <div class="panel-sub">Arrivals and upcoming stays</div>
+              </div>
+            </div>
+            <div class="activity-list" id="hotel-booking-list"></div>
+          </div>
+          <div class="panel">
+            <div class="panel-header">
+              <div>
+                <div class="panel-title">Eco Score Calculator</div>
+                <div class="panel-sub">Activities that determine your Green Badge</div>
+              </div>
+            </div>
+            <div style="padding:1.25rem">
+              <div class="amenity-list" id="hotel-eco-checklist"></div>
+              <div class="eco-preview" style="margin-top:1rem">
+                <span class="ep-lbl">Live Green Badge Preview</span>
+                <div class="ep-lvs" id="hotel-ep-lvs">🍃🍃🍃🍃🍃</div>
+                <div class="ep-txt" id="hotel-ep-txt">Update activities to recalculate…</div>
+              </div>
+              <button class="btn-add-hotel" style="margin-top:1rem" onclick="saveHotelEco()">💾 Save Eco Activities</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="view" id="view-hotel-add">
+        <div class="admin-view">
+          <div class="admin-header">
+            <h2>Hotel Admin Portal</h2>
+            <p>Register your property and manage your eco score listing</p>
+          </div>
+          <div class="admin-grid">
+            <div class="admin-panel">
+              <div class="ap-title">Add New Hotel</div>
+              <div class="ap-sub">Fill in details below. Eco score is calculated from amenities.</div>
+              <div class="afg"><label>Hotel Name</label><input class="ain" type="text" id="nh-name" placeholder="e.g. Snowleopard Mountain Lodge"></div>
+              <div class="afg"><label>Location / Region</label><input class="ain" type="text" id="nh-loc" placeholder="e.g. Namche Bazaar, Koshi Province"></div>
+              <div class="afg"><label>Price per Night (NPR)</label><input class="ain" type="number" id="nh-price" placeholder="e.g. 4500"></div>
+              <div class="afg"><label>Category</label>
+                <select class="ain" id="nh-cat">
+                  <option>Mountain Lodge</option><option>Lakeside Resort</option>
+                  <option>Jungle Camp</option><option>Heritage Inn</option>
+                  <option>City Boutique</option><option>Trekking Teahouse</option>
+                </select>
+              </div>
+              <div class="amenity-list">
+                <label style="font-size:.72rem;font-weight:700;color:var(--g600);letter-spacing:.08em;text-transform:uppercase;display:block;margin-bottom:.5rem;font-family:'Space Mono',monospace">Eco Amenities</label>
+                <div class="am-row"><input type="checkbox" id="e1" onchange="calcEco()"><label for="e1">☀️ Solar / Renewable Energy</label></div>
+                <div class="am-row"><input type="checkbox" id="e2" onchange="calcEco()"><label for="e2">💧 Water Conservation System</label></div>
+                <div class="am-row"><input type="checkbox" id="e3" onchange="calcEco()"><label for="e3">♻️ On-site Waste Recycling</label></div>
+                <div class="am-row"><input type="checkbox" id="e4" onchange="calcEco()"><label for="e4">🌾 Local & Organic Food Sourcing</label></div>
+                <div class="am-row"><input type="checkbox" id="e5" onchange="calcEco()"><label for="e5">🌱 Composting Programme</label></div>
+                <div class="am-row"><input type="checkbox" id="e6" onchange="calcEco()"><label for="e6">🚲 Non-Motorised Transport</label></div>
+                <div class="am-row"><input type="checkbox" id="e7" onchange="calcEco()"><label for="e7">🌳 Reforestation / Tree Planting</label></div>
+              </div>
+              <div class="eco-preview">
+                <span class="ep-lbl">Live Eco Score Preview</span>
+                <div class="ep-lvs" id="ep-lvs">🍃🍃🍃🍃🍃</div>
+                <div class="ep-txt" id="ep-txt">Select amenities above to calculate…</div>
+              </div>
+              <button class="btn-add-hotel" onclick="addHotel()">✅ Submit Hotel Listing</button>
+            </div>
+            <div class="admin-panel" style="padding:0;overflow:hidden">
+              <div class="panel-header">
+                <div>
+                  <div class="panel-title">Waste Reports Management</div>
+                  <div class="panel-sub">Review and action community reports</div>
+                </div>
+              </div>
+              <div style="overflow:auto;max-height:600px">
+                <table class="rpt-table" id="rpt-table">
+                  <thead>
+                    <tr><th>ID</th><th>Location</th><th>Type</th><th>Status</th><th>Action</th></tr>
+                  </thead>
+                  <tbody id="rpt-tbody"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- DRIVER DASHBOARD -->
+      <div class="view" id="view-driver-dash">
+        <div class="dash-header">
+          <div>
+            <h1>🚗 Driver <em>Dashboard</em></h1>
+            <p>Your active trip, carbon savings and destination map</p>
+          </div>
+          <div class="date-chip" id="driver-date-chip"></div>
+        </div>
+        <div class="stats-row">
+          <div class="stat-card">
+            <div class="stat-card-bg">🌱</div>
+            <div class="stat-icon si-green">🌱</div>
+            <div class="stat-num" id="drv-carbon">0 kg</div>
+            <div class="stat-label">CO₂ Saved Today</div>
+            <div class="stat-delta delta-up">vs petrol vehicle</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-bg">⚡</div>
+            <div class="stat-icon si-sky">⚡</div>
+            <div class="stat-num" id="drv-km">0 km</div>
+            <div class="stat-label">Distance Driven</div>
+            <div class="stat-delta delta-up">Zero emissions</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-bg">🚗</div>
+            <div class="stat-icon si-green">🚗</div>
+            <div class="stat-num" id="drv-trips">0</div>
+            <div class="stat-label">Trips Completed</div>
+            <div class="stat-delta delta-up">This month</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-bg">🔋</div>
+            <div class="stat-icon si-gold">🔋</div>
+            <div class="stat-num" id="drv-battery">87%</div>
+            <div class="stat-label">Battery Level</div>
+            <div class="stat-delta delta-up">~340 km range</div>
+          </div>
+        </div>
+        <div class="dash-grid">
+          <div class="panel">
+            <div class="panel-header">
+              <div>
+                <div class="panel-title">Active Trip</div>
+                <div class="panel-sub">Your current passenger & destination</div>
+              </div>
+              <span id="drv-trip-status" class="act-status s-progress">On Trip</span>
+            </div>
+            <div style="padding:1.5rem">
+              <div class="driver-trip-card" id="driver-active-trip"></div>
+              <button class="btn-add-hotel" style="margin-top:1rem;background:linear-gradient(135deg,var(--g700),var(--g400))" onclick="showView('driver-map')">🗺️ Open Navigation Map</button>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-header">
+              <div>
+                <div class="panel-title">Carbon Savings Log</div>
+                <div class="panel-sub">CO₂ saved per completed trip</div>
+              </div>
+            </div>
+            <div class="activity-list" id="drv-carbon-log"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DRIVER MAP -->
+      <div class="view" id="view-driver-map">
+        <div class="waste-topbar">
+          <div>
+            <h2>🗺️ Navigation Map</h2>
+            <p>Your destination and route — live view</p>
+          </div>
+          <div class="waste-stats">
+            <div class="wstat"><span class="wstat-n" id="drv-map-km">--</span><span class="wstat-l">km Away</span></div>
+            <div class="wstat"><span class="wstat-n" id="drv-map-eta">--</span><span class="wstat-l">ETA</span></div>
+            <div class="wstat"><span class="wstat-n" id="drv-map-co2">--</span><span class="wstat-l">CO₂ Saved</span></div>
+          </div>
+        </div>
+        <div class="waste-body">
+          <div id="map-driver"></div>
+          <div class="waste-panel">
+            <div class="wp-header">
+              <h3>🚗 Trip Details</h3>
+              <p>Current passenger & destination</p>
+            </div>
+            <div style="padding:1rem;flex:1;overflow-y:auto">
+              <div id="drv-trip-detail"></div>
+              <div style="margin-top:1rem">
+                <div class="panel-title" style="font-size:.9rem;margin-bottom:.75rem">Upcoming Trips</div>
+                <div id="drv-upcoming-list"></div>
+              </div>
+            </div>
+            <div style="padding:1rem;border-top:1px solid var(--border)">
+              <button class="btn-submit-rpt" style="background:linear-gradient(135deg,var(--g700),var(--g400))" onclick="completeDriverTrip()">✅ Mark Trip Complete</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- EV ADMIN MAP (Driver Location Tracker) -->
+      <div class="view" id="view-ev-map">
+        <div class="waste-topbar">
+          <div>
+            <h2>📍 Live Driver Locations</h2>
+            <p>Real-time map showing all active EV drivers</p>
+          </div>
+          <div class="waste-stats">
+            <div class="wstat"><span class="wstat-n" id="ev-map-active">3</span><span class="wstat-l">On Trip</span></div>
+            <div class="wstat"><span class="wstat-n" id="ev-map-available">3</span><span class="wstat-l">Available</span></div>
+            <div class="wstat"><span class="wstat-n" id="ev-map-total">6</span><span class="wstat-l">Total Fleet</span></div>
+          </div>
+        </div>
+        <div class="waste-body">
+          <div id="map-ev-admin"></div>
+          <div class="waste-panel">
+            <div class="wp-header">
+              <h3>🚗 Fleet Status</h3>
+              <p>Click a vehicle to track on map</p>
+            </div>
+            <div class="wp-list" id="ev-driver-list"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="view" id="view-ev-dash">
+        <div class="dash-header">
+          <div>
+            <h1>⚡ EV Fleet <em>Dashboard</em></h1>
+            <p>Customer bookings and carbon footprint reduction tracking</p>
+          </div>
+          <div class="date-chip"></div>
+        </div>
+        <div class="stats-row">
+          <div class="stat-card">
+            <div class="stat-card-bg">👥</div>
+            <div class="stat-icon si-green">👥</div>
+            <div class="stat-num">248</div>
+            <div class="stat-label">Total Customers</div>
+            <div class="stat-delta delta-up">↑ 31 this month</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-bg">🚗</div>
+            <div class="stat-icon si-sky">🚗</div>
+            <div class="stat-num">18</div>
+            <div class="stat-label">Active EV Fleet</div>
+            <div class="stat-delta delta-up">3 on trip now</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-bg">🌱</div>
+            <div class="stat-icon si-green">🌱</div>
+            <div class="stat-num">4.2T</div>
+            <div class="stat-label">CO₂ Offset Total</div>
+            <div class="stat-delta delta-up">vs petrol equivalent</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-bg">⚡</div>
+            <div class="stat-icon si-gold">⚡</div>
+            <div class="stat-num">62,400</div>
+            <div class="stat-label">km Driven (EV)</div>
+            <div class="stat-delta delta-up">Zero direct emissions</div>
+          </div>
+        </div>
+        <div class="dash-grid">
+          <div class="panel">
+            <div class="panel-header">
+              <div>
+                <div class="panel-title">Customer Bookings</div>
+                <div class="panel-sub">Recent and upcoming EV rentals</div>
+              </div>
+            </div>
+            <div class="activity-list" id="ev-booking-list"></div>
+          </div>
+          <div class="panel">
+            <div class="panel-header">
+              <div>
+                <div class="panel-title">Carbon Footprint Saved Per Trip</div>
+                <div class="panel-sub">EV vs petrol vehicle comparison</div>
+              </div>
+            </div>
+            <div style="padding:1.5rem">
+              <div id="ev-carbon-trips"></div>
+              <div class="carbon-total-box" style="margin-top:1rem">
+                <span class="ct-label">Total fleet CO₂ offset this month</span>
+                <span class="ct-value">842 kg</span>
+                <span class="ct-sub">Equivalent to planting 38 trees 🌳</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="view" id="view-ev-fleet">
+        <div class="dash-header">
+          <div><h1>🚗 Fleet <em>Management</em></h1><p>All vehicles, availability and trip logs</p></div>
+        </div>
+        <div class="hotels-grid" id="ev-fleet-grid"></div>
+      </div>
+      <div class="view" id="view-cleanup-dash">
+        <div class="dash-header">
+          <div>
+            <h1>🗑️ Cleanup Org <em>Dashboard</em></h1>
+            <p>Manage waste pins, track pending and completed cleanups</p>
+          </div>
+          <div class="date-chip"></div>
+        </div>
+        <div class="stats-row">
+          <div class="stat-card">
+            <div class="stat-card-bg">⏳</div>
+            <div class="stat-icon si-gold">⏳</div>
+            <div class="stat-num" id="cu-pending-count">0</div>
+            <div class="stat-label">Pending Reports</div>
+            <div class="stat-delta delta-down" id="cu-pending-delta">Awaiting action</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-bg">🔄</div>
+            <div class="stat-icon si-sky">🔄</div>
+            <div class="stat-num" id="cu-progress-count">0</div>
+            <div class="stat-label">In Progress</div>
+            <div class="stat-delta delta-up">Active cleanups</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-bg">✅</div>
+            <div class="stat-icon si-green">✅</div>
+            <div class="stat-num" id="cu-resolved-count">0</div>
+            <div class="stat-label">Resolved</div>
+            <div class="stat-delta delta-up">94% success rate</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-bg">⚡</div>
+            <div class="stat-icon si-green">⚡</div>
+            <div class="stat-num">48h</div>
+            <div class="stat-label">Avg Response Time</div>
+            <div class="stat-delta delta-up">↓ 6h vs last month</div>
+          </div>
+        </div>
+        <div class="dash-grid">
+          <div class="panel">
+            <div class="panel-header">
+              <div>
+                <div class="panel-title">🔴 Pending Waste Pins</div>
+                <div class="panel-sub">Require immediate action</div>
+              </div>
+            </div>
+            <div class="activity-list" id="cu-pending-list"></div>
+          </div>
+          <div class="panel">
+            <div class="panel-header">
+              <div>
+                <div class="panel-title">✅ Completed Cleanups</div>
+                <div class="panel-sub">Recently resolved reports</div>
+              </div>
+            </div>
+            <div class="activity-list" id="cu-resolved-list"></div>
+          </div>
+        </div>
+      </div>
+      <div class="view" id="view-cleanup-map">
+        <div class="waste-topbar">
+          <div>
+            <h2>Nepal Waste Management Map</h2>
+            <p>All pinned waste locations — click to manage and update status</p>
+          </div>
+          <div class="waste-stats">
+            <div class="wstat"><span class="wstat-n" id="cu-map-filed">0</span><span class="wstat-l">Filed</span></div>
+            <div class="wstat"><span class="wstat-n" id="cu-map-resolved">0</span><span class="wstat-l">Resolved</span></div>
+            <div class="wstat"><span class="wstat-n" id="cu-map-active">0</span><span class="wstat-l">Active</span></div>
+            <div class="wstat"><span class="wstat-n">48h</span><span class="wstat-l">Avg. Response</span></div>
+          </div>
+        </div>
+        <div class="waste-body">
+          <div id="map-cleanup"></div>
+          <div class="waste-panel">
+            <div class="wp-header">
+              <h3>🗑 All Waste Reports</h3>
+              <p>Click any report to focus on map</p>
+            </div>
+            <div class="wp-list" id="wp-list-cleanup"></div>
+            <div style="padding:1rem;border-top:1px solid var(--border)">
+              <button class="btn-submit-rpt" style="background:linear-gradient(135deg,var(--g700),var(--g400))" onclick="resolveAllPending()">✅ Mark All Pending → In Progress</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<div class="modal-overlay" id="book-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('book-modal')">×</button>
+    <img id="bm-img" src="" alt="" class="book-modal-img">
+    <h3 id="bm-name">Hotel Name</h3>
+    <p id="bm-loc" style="font-size:.8rem;color:var(--muted);margin-bottom:.75rem"></p>
+    <div class="book-details">
+      <div class="book-row"><strong>Eco Score</strong><span id="bm-eco"></span></div>
+      <div class="book-row"><strong>Price / night</strong><span id="bm-price"></span></div>
+      <div class="book-row"><strong>Rating</strong><span id="bm-rating"></span></div>
+    </div>
+    <div class="afg"><label>Check-in Date</label><input class="ain" type="date" id="bm-checkin"></div>
+    <div class="afg"><label>Check-out Date</label><input class="ain" type="date" id="bm-checkout"></div>
+    <button class="btn-signin" style="margin-top:.5rem" onclick="confirmBooking()">Confirm Booking (+60 EcoScore)</button>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<script src="app.js"></script>
+</body>
+</html>
